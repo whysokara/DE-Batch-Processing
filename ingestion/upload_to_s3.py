@@ -1,23 +1,23 @@
-import boto3
 import os
+import boto3
 
-## Config
 BUCKET_NAME = "s3kara-batch"
-S3_FOLDER = "bronze"
-LOCAL_FILE_PATH = "/Users/kara/Desktop/batch/data/behaviour_metrics.csv"
+LOCAL_DATA_DIR = "../data"
+BRONZE_PREFIX = "bronze"
 
-## Extract file name
-file_name = os.path.basename(LOCAL_FILE_PATH)
-s3_key = f"{S3_FOLDER}/{file_name}"
-
-# Create s3 client
 s3 = boto3.client("s3")
 
-# Upload file
-s3.upload_file(
-    Filename=LOCAL_FILE_PATH,
-    Bucket=BUCKET_NAME,
-    Key=s3_key
-)
+for file in os.listdir(LOCAL_DATA_DIR):
+    if not file.endswith(".csv"):
+        continue
 
-print(f"Uploaded {LOCAL_FILE_PATH} to s3://{BUCKET_NAME}/{s3_key}")
+    local_file_path = os.path.join(LOCAL_DATA_DIR, file)
+    s3_key = f"{BRONZE_PREFIX}/{file}"
+
+    s3.upload_file(
+        Filename=local_file_path,
+        Bucket=BUCKET_NAME,
+        Key=s3_key
+    )
+
+    print(f"Uploaded {file} → s3://{BUCKET_NAME}/{s3_key}")
